@@ -18,3 +18,9 @@ class UserBehavior(HttpUser):
     @task
     def purchase_places(self):
         self.client.post("/purchasePlaces", {"club": "Iron Temple", "competition": "Spring Festival", "places": 2})
+
+    @task
+    def error_page(self):
+        with self.client.get("/error", catch_response=True) as response:
+            if response.status_code != 200:
+                response.failure("Error - HTTP status code: {}".format(response.status_code))
