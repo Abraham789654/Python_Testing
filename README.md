@@ -1,81 +1,46 @@
-# Intro
-```
-Hey,
+Ancienne version :
 
-Je viens de recevoir le rapport de QA pour la phase 1 du projet. Il y a plusieurs bogues, dont un qui fait planter l'application ! 
-Malheureusement, je ne suis pas au bureau pour les prochains jours (un de mes enfants est tombé malade ce week-end). 
-Je ne sais pas encore quand je pourrai être là dans la semaine. Pourriez-vous prendre en charge la mise en œuvre du projet ? 
-Vous devrez régler les bogues de la phase 1 et mettre en œuvre les éléments de la phase 2 (j'ai ajouté le travail de la phase 2 et les bogues de la section “issues” du repo). 
+def purchasePlaces():
+    competition = [c for c in competitions if c['name'] == request.form['competition']][0]
+    club = [c for c in clubs if c['name'] == request.form['club']][0]
+    placesRequired = int(request.form['places'])
+    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
+    flash('Great-booking complete!')
+    return render_template('welcome.html', club=club, competitions=competitions)
 
-Vous devrez cloner et forker le repo et le mettre en place sur votre machine locale (tout ce dont vous avez besoin se trouve dans le fichier README). 
-Ensuite, passez en revue les bogues dans la section des problèmes, puis essayez de reproduire les problèmes sur votre machine locale pour résoudre les bogues et ajouter la gestion des erreurs. 
-Pour gagner du temps de configuration, nous utilisons Flask et JSON pour éviter d'utiliser une base de données. 
-La plupart des outils dont vous aurez besoin se trouvent dans le fichier requirements.txt dans le repo, 
-mais vous devrez installer Flask et notre framework de test préféré, pytest, ainsi que notre outil de test de performance, Locust. 
+Dans l'ancienne version, la fonction purchasePlaces recherche la compétition et le club correspondants dans les listes competitions et clubs respectivement, en fonction des noms soumis dans le formulaire. Ensuite, elle déduit le nombre de places requises de la compétition et renvoie un message flash indiquant que la réservation a été effectuée avec succès, avant de rendre le modèle "welcome.html".
 
-Vous devrez également préparer un rapport de test et un rapport de performances, 
-conformément au guide de développement à la fin des spécifications fonctionnelles ci-jointes. 
-Veillez à suivre toutes les directives, car le QA nous reproche de ne pas respecter les normes. 
-Vous devez tester de manière approfondie les résultats requis (à la fois les happy paths et les sad paths) pour toutes les fonctionnalités de l'application.  
-Je vous encourage également à adopter une approche de TDD, car cela vous aidera à rationaliser votre travail. 
+Nouvelle version :
 
-Une fois que vous aurez terminé, nous ferons un examen de ce que vous avez dans la branche QA du code. 
-Nous examinerons les rapports et la manière dont vous avez résolu les problèmes, 
-nous examinerons votre code et nous testerons la couverture de la nouvelle fonctionnalité. 
+def purchasePlaces():
+    competition_name = request.form['competition']
+    club_name = request.form['club']
+    places_required = int(request.form['places'])
 
-Merci !
+    # Recherche de la compétition et du club dans les données existantes
+    competition = next((c for c in competitions if c['name'] == competition_name), None)
+    club = next((c for c in clubs if c['name'] == club_name), None)
 
-```
-1. Why
+    # Vérification si la compétition et le club existent
+    if competition is None or club is None:
+        flash('Error - Competition or club not found!')
+        return render_template('welcome.html', club=club, competitions=competitions)
 
-
-    This is a proof of concept (POC) project to show a light-weight version of our competition booking platform. The aim is the keep things as light as possible, and use feedback from the users to iterate.
-
-2. Getting Started
-
-    This project uses the following technologies:
-
-    * Python v3.x+
-
-    * [Flask](https://flask.palletsprojects.com/en/1.1.x/)
-
-        Whereas Django does a lot of things for us out of the box, Flask allows us to add only what we need. 
-     
-
-    * [Virtual environment](https://virtualenv.pypa.io/en/stable/installation.html)
-
-        This ensures you'll be able to install the correct packages without interfering with Python on your machine.
-
-        Before you begin, please ensure you have this installed globally. 
-
-
-3. Installation
-
-    - After cloning, change into the directory and type <code>virtualenv .</code>. This will then set up a a virtual python environment within that directory.
-
-    - Next, type <code>source bin/activate</code>. You should see that your command prompt has changed to the name of the folder. This means that you can install packages in here without affecting affecting files outside. To deactivate, type <code>deactivate</code>
-
-    - Rather than hunting around for the packages you need, you can install in one step. Type <code>pip install -r requirements.txt</code>. This will install all the packages listed in the respective file. If you install a package, make sure others know by updating the requirements.txt file. An easy way to do this is <code>pip freeze > requirements.txt</code>
-
-    - Flask requires that you set an environmental variable to the python file. However you do that, you'll want to set the file to be <code>server.py</code>. Check [here](https://flask.palletsprojects.com/en/1.1.x/quickstart/#a-minimal-application) for more details
-
-    - You should now be ready to test the application. In the directory, type either <code>flask run</code> or <code>python -m flask run</code>. The app should respond with an address you should be able to go to using your browser.
-
-4. Current Setup
-
-    The app is powered by [JSON files](https://www.tutorialspoint.com/json/json_quick_guide.htm). This is to get around having a DB until we actually need one. The main ones are:
-     
-    * competitions.json - list of competitions
-    * clubs.json - list of clubs with relevant information. You can look here to see what email addresses the app will accept for login.
-
-5. Testing
-
-    You are free to use whatever testing framework you like-the main thing is that you can show what tests you are using.
-
-    We also like to show how well we're testing, so there's a module called 
-    [coverage](https://coverage.readthedocs.io/en/coverage-5.1/) you should add to your project.
-   
- 6. Flake8 Report 
+    # Vérification du nombre de places disponibles
+    current_places = int(competition['numberOfPlaces'])
     
+    if places_required <= 0 or places_required > current_places:
+        flash('Error - Invalid number of places requested!')
+        return render_template('welcome.html', club=club, competitions=competitions)
+    
+    if places_required == 12:
+        flash('Info - You cannot buy more than 12 places!')
+        return render_template('welcome.html', club=club, competitions=competitions)
 
+    # Mise à jour du nombre de places après l'achat
+    competition['numberOfPlaces'] = current_places - places_required
 
+    flash('Great - Booking complete!')
+    return render_template('welcome.html', club=club, competitions=competitions)
+
+Dans la nouvelle version, la fonction purchasePlaces prend des noms de compétition, de club et un nombre de places soumis dans le formulaire. Elle recherche ensuite la compétition et le club correspondants dans les listes competitions et clubs, respectivement, et vérifie si le nombre de places demandées est valide. Si tout est en ordre, elle met à jour le nombre de places disponibles pour la compétition et affiche un message flash indiquant que la réservation a été effectuée avec succès. Sinon, elle affiche un message d'erreur approprié.
