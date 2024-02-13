@@ -1,13 +1,6 @@
 import json
 from datetime import datetime, date
-from flask_login import current_user
 from flask import Flask,render_template,request,redirect,flash,url_for
-
-
-# def loadClubs():
-#     with open('clubs.json') as c:
-#          listOfClubs = json.load(c)['clubs']
-#          return listOfClubs
 
 
 def loadClubs(filename="clubs.json"):
@@ -107,13 +100,6 @@ def purchasePlaces():
 
     flash('Great - Booking complete!')
     return render_template('welcome.html', club=club, competitions=competitions, datetime=datetime.now(), today=today)
-
-
-
-
-
-
-
 
 # TODO: Add route for points display
 

@@ -15,9 +15,9 @@ from server import app, competitions, clubs
 class TestClubs(unittest.TestCase):
     def test_loadClubs(self):
         expected_clubs = [
-            {"name": "Simply Lift", "email": "john@simplylift.co", "points": "13"},
-            {"name": "She Lifts", "email": "kate@shelifts.co.uk", "points": "12"},
-            {"name": "Iron Temple", "email": "admin@irontemple.com", "points": "4"},
+            {"name": "Simply Lift", "email": "john@simplylift.co", "points": "25"},
+            {"name": "She Lifts", "email": "kate@shelifts.co.uk", "points": "18"},
+            {"name": "Iron Temple", "email": "admin@irontemple.com", "points": "30"},
             
         ]
         actual_clubs = loadClubs('clubs.json')

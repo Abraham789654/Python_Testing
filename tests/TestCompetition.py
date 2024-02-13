@@ -13,8 +13,8 @@ from server import app, competitions, clubs
 class TestCompetition(unittest.TestCase):
     def test_loadCompetitions(self):
         expected_competitions = [
-            {"name": "Spring Festival", "date": "2020-03-27 10:00:00", "numberOfPlaces": "25"},
-            {"name": "Fall Classic", "date": "2020-10-22 13:30:00", "numberOfPlaces": "13"},
+            {"name": "Spring Festival", "date": "2024-03-27 10:00:00", "numberOfPlaces": "25"},
+            {"name": "Fall Classic", "date": "2025-10-22 13:30:00", "numberOfPlaces": "13"},
         ]
         actual_competitions =loadCompetitions('competitions.json')
         self.assertEqual(sorted(actual_competitions, key=lambda x: x['name']), sorted(expected_competitions, key=lambda x: x['name']))
