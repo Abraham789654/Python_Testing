@@ -1,26 +1,20 @@
-from locust import HttpUser, between, task
+from locust import HttpUser, task, between
 
-class UserBehavior(HttpUser):
-    wait_time = between(5, 9)
+class WebsiteUser(HttpUser):
+    wait_time = between(1, 2.5)
 
     @task
-    def index(self):
+    def load_main(self):
         self.client.get("/")
 
     @task
-    def submit_email(self):
-        self.client.post("/showSummary", {"email": "test@example.com"})
+    def load_showSummary(self):
+        self.client.post("/showSummary", {"email": "john@simplylift.co"})
 
     @task
-    def book_competition(self):
-        self.client.get("/book/Spring%20Festival/Iron%20Temple")
+    def load_book(self):
+        self.client.get("/book/Spring Festival/Simply Lift")
 
     @task
-    def purchase_places(self):
-        self.client.post("/purchasePlaces", {"club": "Iron Temple", "competition": "Spring Festival", "places": 2})
-
-    @task
-    def error_page(self):
-        with self.client.get("/error", catch_response=True) as response:
-            if response.status_code != 200:
-                response.failure("Error - HTTP status code: {}".format(response.status_code))
+    def load_purchasePlaces(self):
+        self.client.post("/purchasePlaces", {"competition": "Spring Festival", "club": "Simply Lift", "places": "1"})
