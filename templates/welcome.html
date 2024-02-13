@@ -5,9 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Summary | GUDLFT Registration</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .container {
+            margin-top: 30px;
+        }
+        .competition-card {
+            margin-bottom: 20px;
+        }
+        .competition-card .thumbnail {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+        }
+        .competition-card h4 {
+            color: #333;
+            margin-top: 0;
+        }
+        .competition-card p {
+            margin-bottom: 10px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
 
@@ -17,7 +51,7 @@
             <a class="navbar-brand" href="#">GUDLFT Registration</a>
         </div>
         <ul class="nav navbar-nav navbar-right">
-            <li><a href="{{url_for('logout')}}"><span class="glyphicon glyphicon-log-out"></span> Log out</a></li>
+            <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span> Log out</a></li>
         </ul>
     </div>
 </nav>
@@ -25,9 +59,8 @@
 <div class="container">
     <div class="row">
         <div class="col-md-8">
-            <h2>Welcome, {{club['email']}}</h2>
+            <h2>Welcome, {{ club['email'] }}</h2>
         </div>
-        
     </div>
 
     {% with messages = get_flashed_messages() %}
@@ -35,30 +68,31 @@
             <div class="alert alert-info">
                 <ul>
                     {% for message in messages %}
-                        <li>{{message}}</li>
+                        <li>{{ message }}</li>
                     {% endfor %}
                 </ul>
             </div>
         {% endif %}
     {% endwith %}
 
-    <p>Points available: {{club['points']}}</p>
+    <p>Points available: {{ club['points'] }}</p>
 
     <h3>Competitions:</h3>
     <div class="row">
         {% for comp in competitions %}
-            <div class="col-sm-6 col-md-4">
-                <div class="thumbnail">
-                    <div class="caption">
-                        <h4>{{comp['name']}}</h4>
-                        <p>Date: {{comp['date']}}</p>
-                        <p>Number of Places: {{comp['numberOfPlaces']}}</p>
-                        {% if comp['numberOfPlaces']|int > 0 %}
+            {% set comp_date = datetime.strptime(comp['date'].split()[0], '%Y-%m-%d').date() %}
+            {% if comp_date > today %}
+                <div class="col-sm-6 col-md-4 competition-card">
+                    <div class="thumbnail">
+                        <h4>{{ comp['name'] }}</h4>
+                        <p>Date: {{ comp_date }}</p>
+                        <p>Number of Places: {{ comp['numberOfPlaces'] }}</p>
+                        {% if comp['numberOfPlaces'] | int > 0 %}
                             <a href="{{ url_for('book', competition=comp['name'], club=club['name']) }}" class="btn btn-primary">Book Places</a>
                         {% endif %}
                     </div>
                 </div>
-            </div>
+            {% endif %}
         {% endfor %}
     </div>
 </div>

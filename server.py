@@ -1,4 +1,6 @@
 import json
+from datetime import datetime, date
+from flask_login import current_user
 from flask import Flask,render_template,request,redirect,flash,url_for
 
 
@@ -28,17 +30,21 @@ clubs = loadClubs()
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', clubs = clubs, competitions = competitions)
 
 @app.route('/showSummary',methods=['POST'])
 def showSummary():
     email = request.form['email']
     club = next((club for club in clubs if club['email'] == email), None)
+    # Définir la variable today avec la date actuelle
+    
     if club:
-        return render_template('welcome.html', club=club, competitions=competitions)
+        today = date.today()
+        return render_template('welcome.html', club=club, competitions=competitions, today=today, datetime=datetime)
     else:
+        today = date.today()
         error_message = 'Error - Email not found.'
-        return render_template('index.html', error_message=error_message)
+    return render_template('index.html', error_message=error_message,today=today, datetime=datetime)
 
 
 @app.route('/book/<competition>/<club>')
@@ -55,6 +61,7 @@ def book(competition, club):
 
 @app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
+    today = date.today()
     competition_name = request.form['competition']
     club_name = request.form['club']
     places_required = int(request.form['places'])
@@ -66,25 +73,46 @@ def purchasePlaces():
     # Vérification si la compétition et le club existent
     if competition is None or club is None:
         flash('Error - Competition or club not found!')
-        return render_template('welcome.html', club=club, competitions=competitions)
+        return render_template('welcome.html', club=club, competitions=competitions, datetime=datetime.now(), today=today)
 
     # Vérification du nombre de places disponibles
     current_places = int(competition['numberOfPlaces'])
-    
     if places_required <= 0 or places_required > current_places:
         flash('Error - Invalid number of places requested!')
-        return render_template('welcome.html', club=club, competitions=competitions)
-    
-    if  places_required == 12 :
-        flash('Info - You cannot buy more than 12 places!')
-        return render_template('welcome.html', club=club, competitions=competitions)
+        return render_template('welcome.html', club=club, competitions=competitions, datetime=datetime.now(), today=today)
 
+    # Conversion de la valeur des points du club en entier
+    club_points = int(club['points'])
+
+    # Vérification du nombre de points disponibles du club
+    if club_points < places_required:
+        flash('Error - Insufficient points!')
+        return render_template('welcome.html', club=club, competitions=competitions, datetime=datetime.now(), today=today)
+
+    # Vérification si le nombre total de places demandées dépasse la limite
+    if places_required > 12:
+        flash('Error - Maximum 12 places can be booked at once!')
+        return render_template('welcome.html', club=club, competitions=competitions, datetime=datetime.now(), today=today)
+
+    # Vérification si le nombre total de places demandées plus les places déjà vendues ne dépasse pas la limite
+    if places_required + (12 - current_places) > 12:
+        flash('Error - Maximum 12 places can be booked for this competition!')
+        return render_template('welcome.html', club=club, competitions=competitions, datetime=datetime.now(), today=today)
 
     # Mise à jour du nombre de places après l'achat
     competition['numberOfPlaces'] = current_places - places_required
 
+    # Mise à jour du nombre de points disponibles du club
+    club['points'] = club_points - places_required
+
     flash('Great - Booking complete!')
-    return render_template('welcome.html', club=club, competitions=competitions)
+    return render_template('welcome.html', club=club, competitions=competitions, datetime=datetime.now(), today=today)
+
+
+
+
+
+
 
 
 # TODO: Add route for points display
